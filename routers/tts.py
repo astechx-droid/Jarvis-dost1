@@ -21,7 +21,6 @@ from pydantic import BaseModel, Field
 from services.tts_service import (
     synthesize,
     synthesize_stream,
-    get_available_voices,
 )
 
 logger = logging.getLogger(__name__)

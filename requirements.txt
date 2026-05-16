@@ -1,0 +1,14 @@
+fastapi
+uvicorn[standard]
+groq
+ddgs
+duckduckgo-search
+python-dotenv
+aiosqlite
+sqlalchemy
+pydantic
+pydantic-settings
+httpx
+python-multipart
+websockets
+edge-tts

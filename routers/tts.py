@@ -21,6 +21,7 @@ from pydantic import BaseModel, Field
 from services.tts_service import (
     synthesize,
     synthesize_stream,
+    get_available_voices,
 )
 
 logger = logging.getLogger(__name__)
@@ -155,8 +156,8 @@ async def list_voices():
         "provider": "Microsoft Edge TTS (Neural)",
         "voices": get_available_voices(),
         "tip": (
-            "For Hinglish, 'hi-IN-SwaraNeural' sounds the most natural "
-            "for mixed Hindi-English speech. "
-            "For a JARVIS-style English voice, use 'en-GB-RyanNeural'."
+            "For Hindi and Hinglish, 'hi-IN-MadhurNeural' is the default Jarvis voice. "
+            "Use 'hi-IN-SwaraNeural' as an alternate Hindi voice or "
+            "'en-IN-PrabhatNeural' for Indian English."
         ),
     }

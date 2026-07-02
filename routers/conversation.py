@@ -254,9 +254,9 @@ async def pipeline_health():
         ],
         "supported_languages": ["english", "hindi", "hinglish"],
         "voice_map": {
-            "english":  "en-GB-RyanNeural",
+            "english":  "hi-IN-MadhurNeural",
             "hindi":    "hi-IN-MadhurNeural",
-            "hinglish": "hi-IN-SwaraNeural",
+            "hinglish": "hi-IN-MadhurNeural",
         },
         "notes": [
             "Stages 3+4 run concurrently (asyncio.gather).",

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JARVIS — Voice AI</title>
+  <title>JARVIS Dost — Hindi Voice AI</title>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -11,6 +11,7 @@
       --green:#00ff88;--orange:#ff8c55;--red:#ff3b1a;
       --bg:#09090f;--bg2:#0d1b2a;--bg3:#111827;
       --border:#ffffff11;--text:#d4d4d4;--muted:#555;
+      --gold:#ffd166;
     }
     html,body{height:100%;overflow:hidden}
     body{
@@ -118,6 +119,10 @@
     .welcome h2{font-size:26px;color:var(--blue);letter-spacing:3px;margin-bottom:10px}
     .welcome p{font-size:13px;color:#444;line-height:1.9}
     .welcome em{color:#2a4a6a;font-style:normal}
+    .quick-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:18px;max-width:680px}
+    .quick-action{background:#0f2133;border:1px solid var(--blue-dim);border-radius:999px;color:#8fdff0;cursor:pointer;font-size:12px;padding:8px 12px;transition:all .2s}
+    .quick-action:hover{border-color:var(--blue);box-shadow:0 0 12px #00d4ff22;transform:translateY(-1px)}
+    .hindi-pill{border:1px solid #ffd16633;border-radius:999px;color:var(--gold);font-size:11px;padding:5px 10px;background:#ffd16611}
 
     /* ── STATUS BAR (pipeline stages) ── */
     #status-bar{
@@ -249,13 +254,14 @@
   <div class="logo">J</div>
   <div>
     <div class="htitle">JARVIS</div>
-    <div class="hsub">JUST A RATHER VERY INTELLIGENT SYSTEM</div>
+    <div class="hsub">HINDI-SPEAKING PERSONAL AI DOST</div>
   </div>
   <div class="hright">
     <div class="mode-toggle">
       <button class="mode-btn active" id="btn-chat" onclick="setMode('chat')">Chat</button>
       <button class="mode-btn"        id="btn-voice" onclick="setMode('voice')">Voice</button>
     </div>
+    <div class="hindi-pill">हिंदी Voice On</div>
     <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:#666">
       <div class="dot"></div><span>Online</span>
     </div>
@@ -266,10 +272,11 @@
 <div id="chat">
   <div class="welcome">
     <h2>JARVIS</h2>
-    <p>Good day, Mr Aryan.<br>
-       How may I assist you today?<br>
-       <em>Type or speak — I support English, Hindi &amp; Hinglish.</em>
+    <p>नमस्ते Mr Aryan.<br>
+       Main aapka Hindi bolne wala JARVIS dost hoon.<br>
+       <em>Bolkar ya type karke kuch bhi kaam karwaaiye — search, planning, coding, writing, learning.</em>
     </p>
+    <div class="quick-actions" id="quick-actions"></div>
   </div>
 </div>
 
@@ -315,7 +322,7 @@
       <path d="M12 5v14M5 12h14"/>
     </svg>
   </button>
-  <textarea id="msg" placeholder="Ask me anything, Mr Aryan…" rows="1"></textarea>
+  <textarea id="msg" placeholder="Hindi mein boliye ya likhiye: ‘Mera kaam plan karo…’" rows="1"></textarea>
   <button class="icon-btn" id="mic-btn" title="Record voice" onclick="toggleRecording()">
     <svg viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"
          stroke-linecap="round" stroke-linejoin="round" width="18" height="18">
@@ -344,6 +351,14 @@ let audioChunks   = [];
 let isRecording   = false;
 let recTimer      = null;
 let recSecs       = 0;
+const QUICK_ACTIONS = [
+  'Aaj ke liye mera kaam plan karo',
+  'Mere liye latest news search karo',
+  'Is topic ko Hindi mein samjhao',
+  'Ek professional message draft karo',
+  'Code/debugging mein meri help karo',
+  'Study timetable bana do'
+];
 
 // Voice-mode state
 let voiceRecording   = false;
@@ -565,6 +580,7 @@ async function _userUnlockAndRetry() {
 document.addEventListener('click',    () => _unlockAudio(), { passive: true });
 document.addEventListener('touchend', () => _unlockAudio(), { passive: true });
 document.addEventListener('keydown',  () => _unlockAudio(), { passive: true });
+document.addEventListener('DOMContentLoaded', renderQuickActions);
 
 // ════════════════════════════════════════════════════════════════════
 //  MODE SWITCHING
@@ -722,12 +738,26 @@ function setBusy(busy) {
 // ════════════════════════════════════════════════════════════════════
 //  NEW CHAT
 // ════════════════════════════════════════════════════════════════════
+function renderQuickActions() {
+  const box = $('quick-actions');
+  if (!box) return;
+  box.innerHTML = QUICK_ACTIONS.map(q =>
+    `<button class="quick-action" onclick="askQuick('${q.replace(/'/g, '&#39;')}')">${q}</button>`
+  ).join('');
+}
+
+function askQuick(text) {
+  $('msg').value = text;
+  sendText();
+}
+
 function newChat() {
   stopAudio();
   convId = null;
   $('chat').innerHTML = `<div class="welcome"><h2>JARVIS</h2>
-    <p>Good day, Mr Aryan.<br>How may I assist you today?<br>
-    <em>Type or speak — English, Hindi &amp; Hinglish supported.</em></p></div>`;
+    <p>नमस्ते Mr Aryan.<br>Main aapka Hindi bolne wala JARVIS dost hoon.<br>
+    <em>Bolkar ya type karke kuch bhi kaam karwaaiye.</em></p><div class="quick-actions" id="quick-actions"></div></div>`;
+  renderQuickActions();
   $('conv-info').textContent = '';
   clearStages();
   $('msg').focus();
@@ -769,7 +799,7 @@ async function sendText() {
     const res  = await fetch('/conversation/text', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({message: text, conversation_id: convId}),
+      body: JSON.stringify({message: text, conversation_id: convId, force_search: /search|latest|news|weather|price|aaj|abhi|taaza/i.test(text)}),
     });
     const data = await res.json();
     hideTyping();
